@@ -84,7 +84,6 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
 	
 		timeReceived = time.time() 
 		recPacket, addr = mySocket.recvfrom(1024)
-		# print(f'rec: {recPacket}, {addr}')
 	       
 		#Fill in start
 	
@@ -166,13 +165,7 @@ def receiveOnePing(mySocket, ID, timeout, destAddr):
 		## calculate time difference RTT
 		ping_time = timeReceived - time_sent	## calculate ping time
 		return ping_time
-			
-		# ## output to console
-		# print(f'header received: {icmp_header}')
-		# print(f'data received: {data}')
-
-
-        
+			        
        	#Fill in end
 		timeLeft = timeLeft - howLongInSelect
 		if timeLeft <= 0:
@@ -211,14 +204,6 @@ def sendOnePing(mySocket, destAddr, ID):
 		
 	header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, myChecksum, ID, 1)
 	packet = header + data
-
-	# print(f'header length pre-ping: {len(header)}')
-	# print(f'data length pre-ping: {len(data)}')
-	
-	# print(f'packet length pre-ping: {len(packet)}')
-
-	# print(f'header (raw) pre-ping: {header}')
-	# print(f'data (raw) pre-ping: {data}')
 	
 	mySocket.sendto(packet, (destAddr, 1)) # AF_INET address must be tuple, not str
 	# Both LISTS and TUPLES consist of a number of objects
@@ -252,6 +237,7 @@ def ping(host, timeout=1, c=None):
 	# timeout=1 means: If one second goes by without a reply from the server,
 	# the client assumes that either the client's ping or the server's pong is lost
 	dest = gethostbyname(host)
+	print('========================================================================')
 	print("Pinging " + dest + " using Python:")
 	print("")
 	# Send ping requests to a server separated by approximately one second
@@ -264,8 +250,6 @@ def ping(host, timeout=1, c=None):
 			break	## stop sending pings if finished
 
 		## calculate current delay
-		# if t: delay = doOnePing(dest, t)	## set timeout to TTL
-		# else: delay = doOnePing(dest, timeout)
 		delay = doOnePing(dest, timeout)
 
 		## update statistics
@@ -290,7 +274,7 @@ def ping(host, timeout=1, c=None):
 	else: avg_RTT = 0		## edge case: if no packets received
 
 	## output statistics
-	print(f'--- {dest} ping statistics ---')
+	print(f'\n--- {dest} ping statistics ---')
 	print(f'{t_RTT} packets transmitted, {r_RTT} packets received,', end=' ') 
 	print(f'{packet_loss}% packet loss, {avg_RTT} average RTT')
 
@@ -323,12 +307,14 @@ if __name__ == '__main__':
 	host = args.host
 
 	## parse echo request messages count
+	requests_count = None
 	if args.count:
 		## specifies the number of echo request messages
 		requests_count = int(args.count)
 		print(f'requests count: {requests_count}')
 
 	## parse TTL
+	requests_ttl = 1
 	if args.ttl:
 		## explicitly sets TTL
 		requests_ttl = int(args.ttl)
